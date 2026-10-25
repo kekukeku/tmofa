@@ -2,7 +2,10 @@
  * 2025 TMoFA Annual Report Bilingual Web Viewer
  * Features:
  * - Floating Cursor Curtain Split (游標分屏滑桿對照)
- * - Instant Toggle Mode (單頁點擊/空白鍵快速切換)
+ * - Transparent In-Place Text Selection Layer (透明文字選取複製層)
+ * - Instant One-Click Page Text Copy (一鍵複製整頁文字)
+ * - Plain Text Drawer Panel for Editors / Typesetters (純文字排版抽屜)
+ * - Spacebar/Click Language Toggle (單頁快速切換)
  * - Dual Column Side-by-Side Mode (雙頁並排)
  * - Active Cursor Tracking & Touch Gestures
  * - Full 63-page preloading & Thumbnail Navigation
@@ -12,7 +15,7 @@
 (() => {
   'use strict';
 
-  // State
+  // Constants & State
   const TOTAL_PAGES = 63;
   let currentPage = 1;
   let currentMode = 'split'; // 'split' | 'toggle' | 'side'
@@ -21,12 +24,20 @@
   let isDragging = false;
   let followCursor = false;
   let isThumbsOpen = false;
+  let isTextDrawerOpen = false;
+  let drawerLang = 'en';     // 'en' | 'zh'
   let zoomLevel = 1.0;
+  let pagesData = null;      // Loaded from pages_data.json
 
-  // DOM Elements
+  // DOM Elements - Main Stage
   const splitContainer = document.getElementById('splitContainer');
   const sideContainer = document.getElementById('sideContainer');
+  const layerZh = document.getElementById('layerZh');
   const layerEn = document.getElementById('layerEn');
+  const textLayerZh = document.getElementById('textLayerZh');
+  const textLayerEn = document.getElementById('textLayerEn');
+  const textLayerSideZh = document.getElementById('textLayerSideZh');
+  const textLayerSideEn = document.getElementById('textLayerSideEn');
   const curtainLine = document.getElementById('curtainLine');
   const curtainHandle = document.getElementById('curtainHandle');
   const imgZh = document.getElementById('imgZh');
@@ -46,6 +57,18 @@
   const modeToggle = document.getElementById('modeToggle');
   const modeSide = document.getElementById('modeSide');
 
+  // Copy & Text Drawer Elements
+  const btnCopyPageText = document.getElementById('btnCopyPageText');
+  const btnOpenTextDrawer = document.getElementById('btnOpenTextDrawer');
+  const textDrawer = document.getElementById('textDrawer');
+  const btnCloseTextDrawer = document.getElementById('btnCloseTextDrawer');
+  const tabDrawerEn = document.getElementById('tabDrawerEn');
+  const tabDrawerZh = document.getElementById('tabDrawerZh');
+  const drawerTextArea = document.getElementById('drawerTextArea');
+  const drawerPageInfo = document.getElementById('drawerPageInfo');
+  const btnCopyAllDrawer = document.getElementById('btnCopyAllDrawer');
+  const toast = document.getElementById('toast');
+
   // Zoom & Tools
   const btnZoomIn = document.getElementById('btnZoomIn');
   const btnZoomOut = document.getElementById('btnZoomOut');
@@ -62,6 +85,8 @@
   const pillZh = document.getElementById('pillZh');
   const pillEn = document.getElementById('pillEn');
   const pillSplitToggle = document.getElementById('pillSplitToggle');
+  const btnPillCopy = document.getElementById('btnPillCopy');
+  const btnPillTextDrawer = document.getElementById('btnPillTextDrawer');
   const btnFollowCursor = document.getElementById('btnFollowCursor');
   const btnToggleThumbs = document.getElementById('btnToggleThumbs');
 
@@ -73,12 +98,23 @@
   // ----------------------------------------------------
   // Initialization
   // ----------------------------------------------------
-  function init() {
+  async function init() {
     readUrlParams();
     buildThumbnails();
     bindEvents();
-    updatePageView();
     updateModeUI();
+
+    // Load pages data for in-place text selection & copy
+    try {
+      const res = await fetch('pages_data.json');
+      if (res.ok) {
+        pagesData = await res.json();
+      }
+    } catch (e) {
+      console.warn('Could not load pages_data.json:', e);
+    }
+
+    setPage(currentPage);
     preloadAdjacentPages();
   }
 
@@ -103,6 +139,7 @@
       const l = params.get('lang');
       if (['zh', 'en'].includes(l)) {
         activeLang = l;
+        drawerLang = l;
       }
     }
   }
@@ -115,7 +152,7 @@
   }
 
   // ----------------------------------------------------
-  // Page Navigation & Image Updates
+  // Page Navigation & Image / Text Updates
   // ----------------------------------------------------
   function setPage(num) {
     if (num < 1) num = 1;
@@ -138,8 +175,17 @@
     imgSideZh.src = zhSrc;
     imgSideEn.src = enSrc;
 
+    // Render transparent text selection layers
+    renderTextLayers();
+
+    // Update Text Drawer if open
+    updateDrawerContent();
+
     // Highlight thumbnail
     syncThumbnailActive();
+
+    // Update Stage UI
+    updatePageView();
 
     // Preload next & prev pages
     preloadAdjacentPages();
@@ -147,7 +193,7 @@
   }
 
   function syncTocSelect() {
-    const tocBreakpoints = [1, 2, 3, 5, 21, 36, 48, 53, 57, 60, 63];
+    const tocBreakpoints = [1, 2, 3, 4, 5, 21, 36, 48, 53, 57, 60, 63];
     let matched = 1;
     for (const b of tocBreakpoints) {
       if (currentPage >= b) matched = b;
@@ -172,6 +218,40 @@
   }
 
   // ----------------------------------------------------
+  // Transparent In-Place Text Selection Layer
+  // ----------------------------------------------------
+  function renderTextLayers() {
+    if (!pagesData || !pagesData[currentPage]) {
+      [textLayerZh, textLayerEn, textLayerSideZh, textLayerSideEn].forEach(el => {
+        if (el) el.innerHTML = '';
+      });
+      return;
+    }
+
+    const pData = pagesData[currentPage];
+
+    // English Text Lines
+    const htmlEn = (pData.lines_en || []).map(l => {
+      return `<span class="text-line" style="left:${l.l}%;top:${l.top}%;width:${l.w}%;height:${l.h}%;font-size:calc(var(--stage-scale, 1) * ${l.s * 5.95}px);">${escapeHtml(l.t)}</span>`;
+    }).join('');
+
+    // Chinese Text Lines
+    const htmlZh = (pData.lines_zh || []).map(l => {
+      return `<span class="text-line" style="left:${l.l}%;top:${l.top}%;width:${l.w}%;height:${l.h}%;font-size:calc(var(--stage-scale, 1) * ${l.s * 5.95}px);">${escapeHtml(l.t)}</span>`;
+    }).join('');
+
+    if (textLayerEn) textLayerEn.innerHTML = htmlEn;
+    if (textLayerZh) textLayerZh.innerHTML = htmlZh;
+    if (textLayerSideEn) textLayerSideEn.innerHTML = htmlEn;
+    if (textLayerSideZh) textLayerSideZh.innerHTML = htmlZh;
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  // ----------------------------------------------------
   // Split Curtain Logic
   // ----------------------------------------------------
   function setSplitPercentage(pct) {
@@ -182,7 +262,7 @@
     splitContainer.style.setProperty('--split-pct', `${splitPct.toFixed(2)}%`);
     curtainLine.style.left = `${splitPct.toFixed(2)}%`;
 
-    // Update clip-path on English overlay
+    // Update clip-path on English overlay (both image and text layer)
     layerEn.style.clipPath = `polygon(${splitPct.toFixed(2)}% 0, 100% 0, 100% 100%, ${splitPct.toFixed(2)}% 100%)`;
 
     // Update pill indicator
@@ -263,11 +343,108 @@
   function toggleLanguage() {
     activeLang = (activeLang === 'en') ? 'zh' : 'en';
     if (currentMode === 'split') {
-      // In split mode, snap to full screen of chosen language
       setSplitPercentage(activeLang === 'zh' ? 100 : 0);
     } else {
       updatePageView();
     }
+  }
+
+  // ----------------------------------------------------
+  // Copy to Clipboard & Toast
+  // ----------------------------------------------------
+  function copyCurrentPageText(lang = activeLang) {
+    if (!pagesData || !pagesData[currentPage]) {
+      showToast('⚠️ 正在加載本頁文字...');
+      return;
+    }
+
+    const pData = pagesData[currentPage];
+    const textToCopy = (lang === 'zh') ? pData.text_zh : pData.text_en;
+
+    if (!textToCopy || !textToCopy.trim()) {
+      showToast(`ℹ️ 第 ${currentPage} 頁為圖像或無文字`);
+      return;
+    }
+
+    copyTextToClipboard(textToCopy, `✅ 已複製第 ${currentPage} 頁 ${lang === 'zh' ? '繁中原稿' : '英文定稿'} 全文！`);
+  }
+
+  function copyTextToClipboard(text, successMsg) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(() => {
+        showToast(successMsg);
+      }).catch(() => {
+        fallbackCopyText(text, successMsg);
+      });
+    } else {
+      fallbackCopyText(text, successMsg);
+    }
+  }
+
+  function fallbackCopyText(text, successMsg) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    try {
+      document.execCommand('copy');
+      showToast(successMsg);
+    } catch (_) {
+      showToast('❌ 複製失敗，請手動反白複製');
+    }
+    document.body.removeChild(ta);
+  }
+
+  let toastTimer = null;
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => {
+      toast.classList.remove('show');
+    }, 2800);
+  }
+
+  // ----------------------------------------------------
+  // Text Drawer Panel Logic
+  // ----------------------------------------------------
+  function toggleTextDrawer(force) {
+    isTextDrawerOpen = (typeof force === 'boolean') ? force : !isTextDrawerOpen;
+    if (isTextDrawerOpen) {
+      textDrawer.classList.add('open');
+      btnPillTextDrawer.classList.add('active');
+      btnOpenTextDrawer.classList.add('active');
+      updateDrawerContent();
+    } else {
+      textDrawer.classList.remove('open');
+      btnPillTextDrawer.classList.remove('active');
+      btnOpenTextDrawer.classList.remove('active');
+    }
+  }
+
+  function updateDrawerContent() {
+    drawerPageInfo.textContent = `第 ${currentPage} 頁 / Page ${currentPage} (${drawerLang.toUpperCase()})`;
+    if (!pagesData || !pagesData[currentPage]) {
+      drawerTextArea.value = '加載中... / Loading...';
+      return;
+    }
+    const pData = pagesData[currentPage];
+    drawerTextArea.value = (drawerLang === 'zh') ? (pData.text_zh || '(本頁無文字)') : (pData.text_en || '(No text on this page)');
+  }
+
+  function setDrawerLang(lang) {
+    drawerLang = lang;
+    if (lang === 'en') {
+      tabDrawerEn.classList.add('active');
+      tabDrawerZh.classList.remove('active');
+    } else {
+      tabDrawerZh.classList.add('active');
+      tabDrawerEn.classList.remove('active');
+    }
+    updateDrawerContent();
   }
 
   // ----------------------------------------------------
@@ -335,6 +512,7 @@
   function setZoom(lvl) {
     zoomLevel = Math.max(0.6, Math.min(2.5, lvl));
     pageStage.style.transform = `scale(${zoomLevel})`;
+    pageStage.style.setProperty('--stage-scale', zoomLevel);
   }
 
   // ----------------------------------------------------
@@ -359,7 +537,22 @@
     modeToggle.addEventListener('click', () => setMode('toggle'));
     modeSide.addEventListener('click', () => setMode('side'));
 
-    // 4. Floating Pill Bar
+    // 4. Copy & Text Drawer Buttons
+    btnCopyPageText.addEventListener('click', () => copyCurrentPageText('en'));
+    btnPillCopy.addEventListener('click', () => copyCurrentPageText(activeLang));
+
+    btnOpenTextDrawer.addEventListener('click', () => toggleTextDrawer());
+    btnPillTextDrawer.addEventListener('click', () => toggleTextDrawer());
+    btnCloseTextDrawer.addEventListener('click', () => toggleTextDrawer(false));
+
+    tabDrawerEn.addEventListener('click', () => setDrawerLang('en'));
+    tabDrawerZh.addEventListener('click', () => setDrawerLang('zh'));
+
+    btnCopyAllDrawer.addEventListener('click', () => {
+      copyTextToClipboard(drawerTextArea.value, `✅ 已複製第 ${currentPage} 頁 ${drawerLang.toUpperCase()} 全文！`);
+    });
+
+    // 5. Floating Pill Bar
     pillZh.addEventListener('click', () => {
       activeLang = 'zh';
       if (currentMode === 'split') {
@@ -393,7 +586,7 @@
     btnToggleThumbs.addEventListener('click', () => toggleThumbnailsDrawer());
     btnCloseThumbs.addEventListener('click', () => toggleThumbnailsDrawer(false));
 
-    // 5. Curtain Dragging (Pointer Events with capture)
+    // 6. Curtain Dragging (Pointer Events with capture)
     curtainHandle.addEventListener('pointerdown', (e) => {
       isDragging = true;
       curtainHandle.classList.add('dragging');
@@ -434,19 +627,21 @@
       }
     });
 
-    // In toggle mode, clicking the page container toggles language!
+    // In toggle mode, clicking background outside text toggles language
     splitContainer.addEventListener('click', (e) => {
+      // If user clicked or dragged on text-line, don't toggle language
+      if (e.target.closest('.text-line')) return;
       if (currentMode === 'toggle') {
         toggleLanguage();
       }
     });
 
-    // 6. Zoom controls
+    // 7. Zoom controls
     btnZoomIn.addEventListener('click', () => setZoom(zoomLevel + 0.15));
     btnZoomOut.addEventListener('click', () => setZoom(zoomLevel - 0.15));
     btnZoomFit.addEventListener('click', () => setZoom(1.0));
 
-    // 7. Fullscreen
+    // 8. Fullscreen
     btnFullscreen.addEventListener('click', () => {
       if (!document.fullscreenElement) {
         document.documentElement.requestFullscreen().catch(() => {});
@@ -455,26 +650,27 @@
       }
     });
 
-    // 8. Download Menu
+    // 9. Download Menu
     btnDownload.addEventListener('click', (e) => {
       e.stopPropagation();
       downloadMenu.classList.toggle('show');
     });
 
-    document.addEventListener('click', () => {
-      downloadMenu.classList.remove('show');
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.dropdown-wrapper')) {
+        downloadMenu.classList.remove('show');
+      }
     });
 
-    // 9. Help Modal
+    // 10. Help Modal
     btnHelp.addEventListener('click', () => helpModal.classList.add('open'));
     btnCloseModal.addEventListener('click', () => helpModal.classList.remove('open'));
     helpModal.addEventListener('click', (e) => {
       if (e.target === helpModal) helpModal.classList.remove('open');
     });
 
-    // 10. Keyboard Shortcuts
+    // 11. Keyboard Shortcuts
     window.addEventListener('keydown', (e) => {
-      // Don't trigger when typing in inputs
       if (['INPUT', 'SELECT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
 
       switch (e.code) {
@@ -502,6 +698,7 @@
           setSplitPercentage(50);
           break;
         case 'KeyC':
+          if (e.ctrlKey || e.metaKey) return; // Allow native copy
           followCursor = !followCursor;
           btnFollowCursor.classList.toggle('active', followCursor);
           break;
@@ -511,12 +708,13 @@
         case 'Escape':
           helpModal.classList.remove('open');
           toggleThumbnailsDrawer(false);
+          toggleTextDrawer(false);
           downloadMenu.classList.remove('show');
           break;
       }
     });
 
-    // 11. Touch Gestures (Swipe for page flip)
+    // 12. Touch Gestures (Swipe for page flip)
     let touchStartX = 0;
     let touchStartY = 0;
     splitContainer.addEventListener('touchstart', (e) => {
@@ -533,12 +731,11 @@
       const deltaX = touchEndX - touchStartX;
       const deltaY = touchEndY - touchStartY;
 
-      // Horizontal swipe detected
       if (Math.abs(deltaX) > 60 && Math.abs(deltaY) < 50) {
         if (deltaX < 0) {
-          setPage(currentPage + 1); // Swipe left -> next page
+          setPage(currentPage + 1);
         } else {
-          setPage(currentPage - 1); // Swipe right -> prev page
+          setPage(currentPage - 1);
         }
       }
     }, { passive: true });

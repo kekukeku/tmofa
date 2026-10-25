@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-  <title>2025 桃園市立美術館年報 | TMoFA Annual Report 2025 (中英雙語對照)</title>
-  <meta name="description" content="2025 桃園市立美術館年報中英雙語對照線上瀏覽平臺。支援浮動游標隨時中英切換、分屏簾幕對照、雙頁並排與高解析度閱讀。">
+  <title>2025 桃園市立美術館年報 | TMoFA Annual Report 2025 (中英雙語對照 / 支援文字選取複製)</title>
+  <meta name="description" content="2025 桃園市立美術館年報中英雙語對照線上瀏覽平臺。支援浮動游標隨時中英切換、分屏簾幕對照、透明文字層選取複製、雙頁並排與高解析度閱讀。">
   <link rel="stylesheet" href="style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -25,9 +25,10 @@
       <!-- Quick TOC Dropdown -->
       <div class="toc-wrapper">
         <select id="tocSelect" class="select-ctrl" aria-label="章節目錄">
-          <option value="1">封面 Cover</option>
-          <option value="2">市長序 Mayor's Foreword (P.2)</option>
-          <option value="3">館長序 Director's Foreword (P.3)</option>
+          <option value="1">封面 Cover (P.1)</option>
+          <option value="2">目錄 Contents (P.2)</option>
+          <option value="3">館長肖像 Director (P.3)</option>
+          <option value="4">館長序 Director's Foreword (P.4)</option>
           <option value="5">桃園市立美術館 Overview (P.5)</option>
           <option value="21">桃園市兒童美術館 TCAC (P.21)</option>
           <option value="36">橫山書法藝術館 HCAC (P.36)</option>
@@ -56,7 +57,7 @@
       </button>
     </div>
 
-    <!-- Right: Mode Switches, Zoom & Downloads -->
+    <!-- Right: Mode Switches, Copy Tools, Zoom & Downloads -->
     <div class="header-right">
       <!-- Mode Tabs -->
       <div class="mode-tabs" role="tablist" aria-label="瀏覽模式">
@@ -74,8 +75,17 @@
         </button>
       </div>
 
-      <!-- Action Buttons -->
+      <!-- Copy Action Buttons -->
       <div class="tool-group">
+        <button id="btnCopyPageText" class="btn-action btn-copy" title="一鍵複製本頁英文文字 (Copy English Text)">
+          <svg viewBox="0 0 24 24" width="15" height="15"><path fill="currentColor" d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+          <span>複製英文</span>
+        </button>
+
+        <button id="btnOpenTextDrawer" class="btn-icon" title="開啟純文字檢視與排版文字面板">
+          <svg viewBox="0 0 24 24" width="17" height="17"><path fill="currentColor" d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+        </button>
+
         <button id="btnZoomFit" class="btn-icon" title="最適畫面 Fit Screen">
           <svg viewBox="0 0 24 24" width="17" height="17"><path fill="currentColor" d="M3 3h6v2H5v4H3V3zm12 0h6v6h-2V5h-4V3zM3 15h2v4h4v2H3v-6zm16 4h-4v2h6v-6h-2v4z"/></svg>
         </button>
@@ -92,7 +102,7 @@
         <!-- Download Dropdown -->
         <div class="dropdown-wrapper">
           <button id="btnDownload" class="btn-action" title="下載 PDF">
-            <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/></svg>
+            <svg viewBox="0 0 24 24" width="15" height="15"><path fill="currentColor" d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/></svg>
             <span>下載 PDF</span>
           </button>
           <div class="dropdown-menu" id="downloadMenu">
@@ -122,14 +132,18 @@
       <!-- 1. Split Curtain View (Default) -->
       <div class="split-container" id="splitContainer">
         <!-- Chinese Underlay Page (Left Side by default) -->
-        <div class="layer layer-zh">
+        <div class="layer layer-zh" id="layerZh">
           <img id="imgZh" src="pages/zh/p1.webp" alt="中文原版頁面" draggable="false">
+          <!-- Transparent In-place Text Selection Layer (ZH) -->
+          <div class="text-layer" id="textLayerZh"></div>
           <div class="lang-tag tag-zh">中文 (ZH)</div>
         </div>
 
         <!-- English Overlay Page (Right Side by default with clip-path) -->
         <div class="layer layer-en" id="layerEn">
           <img id="imgEn" src="pages/en/p1.webp" alt="English Translation Page" draggable="false">
+          <!-- Transparent In-place Text Selection Layer (EN) -->
+          <div class="text-layer" id="textLayerEn"></div>
           <div class="lang-tag tag-en">English (EN)</div>
         </div>
 
@@ -147,11 +161,17 @@
       <div class="side-container" id="sideContainer" style="display: none;">
         <div class="side-pane side-zh">
           <div class="pane-header">繁體中文原版</div>
-          <img id="imgSideZh" src="pages/zh/p1.webp" alt="中文版">
+          <div class="side-pane-inner">
+            <img id="imgSideZh" src="pages/zh/p1.webp" alt="中文版">
+            <div class="text-layer" id="textLayerSideZh"></div>
+          </div>
         </div>
         <div class="side-pane side-en">
-          <div class="pane-header">English Edition</div>
-          <img id="imgSideEn" src="pages/en/p1.webp" alt="English Edition">
+          <div class="pane-header">English Edition (可選取文字)</div>
+          <div class="side-pane-inner">
+            <img id="imgSideEn" src="pages/en/p1.webp" alt="English Edition">
+            <div class="text-layer" id="textLayerSideEn"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -161,6 +181,30 @@
       <span class="follower-text">中 ⇄ EN</span>
     </div>
   </main>
+
+  <!-- Plain Text Drawer Panel (for easy copying into Word / InDesign) -->
+  <aside class="text-drawer" id="textDrawer">
+    <div class="text-drawer-header">
+      <div class="text-drawer-tabs">
+        <button class="drawer-tab active" id="tabDrawerEn">英文定稿 (EN)</button>
+        <button class="drawer-tab" id="tabDrawerZh">中文原稿 (ZH)</button>
+      </div>
+      <div class="text-drawer-actions">
+        <button id="btnCopyAllDrawer" class="btn-drawer-copy" title="複製此頁全文至剪貼簿">
+          <svg viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+          <span>複製全文</span>
+        </button>
+        <button id="btnCloseTextDrawer" class="btn-close" title="關閉文字面板">✕</button>
+      </div>
+    </div>
+    <div class="text-drawer-body">
+      <div class="text-drawer-info">
+        <span id="drawerPageInfo">第 1 頁內文</span>
+        <small>點擊即可直接選取、反白或整段複製貼入 InDesign / Word</small>
+      </div>
+      <textarea id="drawerTextArea" readonly aria-label="本頁文字內容" spellcheck="false"></textarea>
+    </div>
+  </aside>
 
   <!-- Floating Sticky Bottom Pill (Instant Language & Mode Toggle) -->
   <aside class="floating-pill-bar" id="floatingPillBar">
@@ -182,10 +226,22 @@
 
       <div class="pill-sep"></div>
 
+      <!-- Copy Current Page Button -->
+      <button class="pill-chip pill-chip-highlight" id="btnPillCopy" title="一鍵複製本頁英文文字 (Cmd+C)">
+        <span class="chip-icon">📋</span>
+        <span class="chip-text">複製文字</span>
+      </button>
+
+      <!-- Text Drawer Panel Trigger -->
+      <button class="pill-chip" id="btnPillTextDrawer" title="開啟純文字排版抽屜">
+        <span class="chip-icon">📄</span>
+        <span class="chip-text">文字面板</span>
+      </button>
+
       <!-- Follow Cursor Toggle Switch -->
       <button class="pill-chip" id="btnFollowCursor" title="開啟游標動態跟隨：滑鼠移動即時滑動簾幕 (C)">
         <span class="chip-icon">⚡</span>
-        <span class="chip-text">游標跟隨</span>
+        <span class="chip-text">跟隨</span>
       </button>
 
       <!-- Thumbnails Drawer Trigger -->
@@ -207,6 +263,9 @@
     </div>
   </section>
 
+  <!-- Toast Notification -->
+  <div class="toast" id="toast"></div>
+
   <!-- Keyboard Shortcuts & Help Modal -->
   <div class="modal-backdrop" id="helpModal">
     <div class="modal-card">
@@ -216,6 +275,14 @@
       </div>
       <div class="modal-body">
         <div class="shortcut-list">
+          <div class="shortcut-item">
+            <kbd>滑鼠拖曳反白</kbd>
+            <span>直接在頁面上選取英文或中文文字，支援 Ctrl+C / Cmd+C 複製！</span>
+          </div>
+          <div class="shortcut-item">
+            <kbd>📋 複製文字</kbd>
+            <span>點擊頂部或底部按鈕，一鍵將整頁英文純文字複製到剪貼簿</span>
+          </div>
           <div class="shortcut-item">
             <kbd>Space</kbd> 或 <kbd>T</kbd>
             <span>在中文與英文之間快速切換（單頁模式）</span>
@@ -240,14 +307,10 @@
             <kbd>Home</kbd> / <kbd>End</kbd>
             <span>跳轉至封面 (P.1) / 版權頁 (P.63)</span>
           </div>
-          <div class="shortcut-item">
-            <kbd>拖曳中間線</kbd>
-            <span>水平滑動中英對照簾幕，即時比對版面與譯文</span>
-          </div>
         </div>
       </div>
       <div class="modal-footer">
-        <p class="modal-note">桃園市立美術館 2025 年報 · 數位雙語對照成果呈獻</p>
+        <p class="modal-note">桃園市立美術館 2025 年報 · 數位雙語排版與出版文字複製系統</p>
       </div>
     </div>
   </div>
