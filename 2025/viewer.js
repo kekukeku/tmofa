@@ -594,10 +594,17 @@
       e.preventDefault();
     });
 
+    let clickPointerDown = null;
+    splitContainer.addEventListener('pointerdown', (e) => {
+      clickPointerDown = { x: e.clientX, y: e.clientY, time: Date.now() };
+    });
+
     window.addEventListener('pointermove', (e) => {
       if (isDragging) {
         handlePointerMoveOnCurtain(e.clientX);
       } else if (followCursor && currentMode === 'split') {
+        // If user is holding mouse button down (dragging to select text), do NOT move curtain!
+        if (e.buttons > 0) return;
         const rect = splitContainer.getBoundingClientRect();
         if (e.clientX >= rect.left && e.clientX <= rect.right &&
             e.clientY >= rect.top && e.clientY <= rect.bottom) {
@@ -605,8 +612,13 @@
         }
       }
 
-      // Mouse follower badge in toggle mode
+      // Mouse follower badge in toggle mode (hide if text is selected)
       if (currentMode === 'toggle') {
+        const selection = window.getSelection();
+        if (selection && selection.toString().trim().length > 0) {
+          mouseFollower.classList.remove('visible');
+          return;
+        }
         const rect = splitContainer.getBoundingClientRect();
         if (e.clientX >= rect.left && e.clientX <= rect.right &&
             e.clientY >= rect.top && e.clientY <= rect.bottom) {
@@ -627,10 +639,30 @@
       }
     });
 
-    // In toggle mode, clicking background outside text toggles language
+    // In toggle mode, strict guard against text selection triggering language switch
     splitContainer.addEventListener('click', (e) => {
-      // If user clicked or dragged on text-line, don't toggle language
-      if (e.target.closest('.text-line')) return;
+      // 1. If clicked inside text layer or text line, never toggle
+      if (e.target.closest('.text-layer') || e.target.closest('.text-line')) {
+        return;
+      }
+
+      // 2. If there is currently selected / highlighted text, never toggle
+      const selection = window.getSelection();
+      if (selection && selection.toString().trim().length > 0) {
+        return;
+      }
+
+      // 3. If pointer moved or was held down (selection/drag gesture), never toggle
+      if (clickPointerDown) {
+        const dist = Math.hypot(e.clientX - clickPointerDown.x, e.clientY - clickPointerDown.y);
+        const elapsed = Date.now() - clickPointerDown.time;
+        clickPointerDown = null;
+        if (dist > 6 || elapsed > 350) {
+          return;
+        }
+      }
+
+      // 4. Only genuine, clean clicks on the empty background in toggle mode
       if (currentMode === 'toggle') {
         toggleLanguage();
       }
@@ -699,6 +731,8 @@
           break;
         case 'KeyC':
           if (e.ctrlKey || e.metaKey) return; // Allow native copy
+          const sel = window.getSelection();
+          if (sel && sel.toString().trim().length > 0) return; // If text is selected, do not toggle follow
           followCursor = !followCursor;
           btnFollowCursor.classList.toggle('active', followCursor);
           break;
