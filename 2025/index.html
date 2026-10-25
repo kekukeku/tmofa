@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>2025 桃園市立美術館年報 | TMoFA Annual Report 2025 (中英雙語對照)</title>
+  <meta name="description" content="2025 桃園市立美術館年報中英雙語對照線上瀏覽平臺。支援浮動游標隨時中英切換、分屏簾幕對照、雙頁並排與高解析度閱讀。">
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body class="theme-dark">
+  <!-- Top Navigation Bar -->
+  <header class="app-header">
+    <div class="header-left">
+      <div class="brand">
+        <span class="brand-badge">TMoFA 2025</span>
+        <div class="brand-text">
+          <span class="brand-title-zh">桃園市立美術館年報</span>
+          <span class="brand-title-en">Annual Report 2025</span>
+        </div>
+      </div>
+
+      <!-- Quick TOC Dropdown -->
+      <div class="toc-wrapper">
+        <select id="tocSelect" class="select-ctrl" aria-label="章節目錄">
+          <option value="1">封面 Cover</option>
+          <option value="2">市長序 Mayor's Foreword (P.2)</option>
+          <option value="3">館長序 Director's Foreword (P.3)</option>
+          <option value="5">桃園市立美術館 Overview (P.5)</option>
+          <option value="21">桃園市兒童美術館 TCAC (P.21)</option>
+          <option value="36">橫山書法藝術館 HCAC (P.36)</option>
+          <option value="48">綜合業務 General Affairs (P.48)</option>
+          <option value="53">附錄 Appendix (P.53)</option>
+          <option value="57">展覽活動簡表 Exhibition & Event Tables (P.57)</option>
+          <option value="60">大事記 Chronology (P.60)</option>
+          <option value="63">版權頁 Colophon (P.63)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Center: Page Flipping Controls -->
+    <div class="header-center">
+      <button id="btnPrevPage" class="btn-icon" title="上一頁 Previous Page (←)" aria-label="上一頁">
+        <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+      </button>
+
+      <div class="page-selector">
+        <input type="number" id="pageInput" min="1" max="63" value="1" aria-label="目前頁數">
+        <span class="page-total">/ 63</span>
+      </div>
+
+      <button id="btnNextPage" class="btn-icon" title="下一頁 Next Page (→)" aria-label="下一頁">
+        <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+      </button>
+    </div>
+
+    <!-- Right: Mode Switches, Zoom & Downloads -->
+    <div class="header-right">
+      <!-- Mode Tabs -->
+      <div class="mode-tabs" role="tablist" aria-label="瀏覽模式">
+        <button id="modeSplit" class="tab-btn active" role="tab" aria-selected="true" title="浮動游標分屏對照 (S)">
+          <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-8 16H5V5h6v14zm8 0h-6V5h6v14z"/><path fill="currentColor" d="M11 9h2v6h-2z"/></svg>
+          <span>游標對照</span>
+        </button>
+        <button id="modeToggle" class="tab-btn" role="tab" aria-selected="false" title="單頁點擊/按鍵切換 (Space)">
+          <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M12.89 11.1c-.3-.21-.66-.34-1.05-.34-.78 0-1.41.63-1.41 1.41s.63 1.41 1.41 1.41c.39 0 .75-.13 1.05-.34l4.5 4.5-1.41 1.41-4.5-4.5c-.47.28-1.02.44-1.61.44-1.74 0-3.15-1.41-3.15-3.15 0-.59.16-1.14.44-1.61l-4.5-4.5 1.41-1.41 4.5 4.5zM20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V6h16v12z"/></svg>
+          <span>單頁切換</span>
+        </button>
+        <button id="modeSide" class="tab-btn" role="tab" aria-selected="false" title="雙頁並排檢視">
+          <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M3 5v14h8V5H3zm6 12H5V7h4v10zm4-12v14h8V5h-8zm6 12h-4V7h4v10z"/></svg>
+          <span>並排對照</span>
+        </button>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="tool-group">
+        <button id="btnZoomFit" class="btn-icon" title="最適畫面 Fit Screen">
+          <svg viewBox="0 0 24 24" width="17" height="17"><path fill="currentColor" d="M3 3h6v2H5v4H3V3zm12 0h6v6h-2V5h-4V3zM3 15h2v4h4v2H3v-6zm16 4h-4v2h6v-6h-2v4z"/></svg>
+        </button>
+        <button id="btnZoomIn" class="btn-icon" title="放大 Zoom In (+)">
+          <svg viewBox="0 0 24 24" width="17" height="17"><path fill="currentColor" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+        </button>
+        <button id="btnZoomOut" class="btn-icon" title="縮小 Zoom Out (-)">
+          <svg viewBox="0 0 24 24" width="17" height="17"><path fill="currentColor" d="M19 13H5v-2h14v2z"/></svg>
+        </button>
+        <button id="btnFullscreen" class="btn-icon" title="全螢幕 Fullscreen (F)">
+          <svg viewBox="0 0 24 24" width="17" height="17"><path fill="currentColor" d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
+        </button>
+
+        <!-- Download Dropdown -->
+        <div class="dropdown-wrapper">
+          <button id="btnDownload" class="btn-action" title="下載 PDF">
+            <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/></svg>
+            <span>下載 PDF</span>
+          </button>
+          <div class="dropdown-menu" id="downloadMenu">
+            <a href="pdf/2025_TMoFA_Annual_Report_EN.pdf" download class="dropdown-item">
+              <strong>English Edition PDF</strong>
+              <small>高解析英文出版版 (12 MB)</small>
+            </a>
+            <a href="pdf/2025_TMoFA_Annual_Report_ZH.pdf" download class="dropdown-item">
+              <strong>繁體中文原版 PDF</strong>
+              <small>高解析中文年報版 (12 MB)</small>
+            </a>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-footer">63 頁完整橫向 A4 規格</div>
+          </div>
+        </div>
+
+        <button id="btnHelp" class="btn-icon" title="操作說明 (快捷鍵)">
+          <svg viewBox="0 0 24 24" width="17" height="17"><path fill="currentColor" d="M11 18h2v-2h-2v2zm1-16C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-2.21 0-4 1.79-4 4h2c0-1.1.9-2 2-2s2 .9 2 2c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5 0-2.21-1.79-4-4-4z"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Viewport Canvas -->
+  <main class="viewer-main" id="viewerMain">
+    <div class="page-stage" id="pageStage">
+      <!-- 1. Split Curtain View (Default) -->
+      <div class="split-container" id="splitContainer">
+        <!-- Chinese Underlay Page (Left Side by default) -->
+        <div class="layer layer-zh">
+          <img id="imgZh" src="pages/zh/p1.webp" alt="中文原版頁面" draggable="false">
+          <div class="lang-tag tag-zh">中文 (ZH)</div>
+        </div>
+
+        <!-- English Overlay Page (Right Side by default with clip-path) -->
+        <div class="layer layer-en" id="layerEn">
+          <img id="imgEn" src="pages/en/p1.webp" alt="English Translation Page" draggable="false">
+          <div class="lang-tag tag-en">English (EN)</div>
+        </div>
+
+        <!-- Floating Curtain Divider & Cursor Handle -->
+        <div class="curtain-line" id="curtainLine">
+          <div class="curtain-handle" id="curtainHandle" title="拖曳分割簾幕 (或開啟游標跟隨)">
+            <span class="handle-arrow">◂</span>
+            <span class="handle-label">中 ❙ EN</span>
+            <span class="handle-arrow">▸</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Side by Side View (Dual Column) -->
+      <div class="side-container" id="sideContainer" style="display: none;">
+        <div class="side-pane side-zh">
+          <div class="pane-header">繁體中文原版</div>
+          <img id="imgSideZh" src="pages/zh/p1.webp" alt="中文版">
+        </div>
+        <div class="side-pane side-en">
+          <div class="pane-header">English Edition</div>
+          <img id="imgSideEn" src="pages/en/p1.webp" alt="English Edition">
+        </div>
+      </div>
+    </div>
+
+    <!-- Mouse Floating Tooltip Badge -->
+    <div class="mouse-follower" id="mouseFollower">
+      <span class="follower-text">中 ⇄ EN</span>
+    </div>
+  </main>
+
+  <!-- Floating Sticky Bottom Pill (Instant Language & Mode Toggle) -->
+  <aside class="floating-pill-bar" id="floatingPillBar">
+    <div class="pill-container">
+      <button class="pill-btn lang-btn active" id="pillZh" data-lang="zh" title="切換為中文 (Space)">
+        <span class="pill-dot"></span>
+        <span class="pill-title">繁中</span>
+      </button>
+
+      <button class="pill-divider-btn" id="pillSplitToggle" title="啟動/居中 浮動游標對照 (S)">
+        <span class="pill-split-icon">◂❙▸</span>
+        <span class="pill-split-label">對照</span>
+      </button>
+
+      <button class="pill-btn lang-btn" id="pillEn" data-lang="en" title="切換為英文 (Space)">
+        <span class="pill-dot"></span>
+        <span class="pill-title">EN</span>
+      </button>
+
+      <div class="pill-sep"></div>
+
+      <!-- Follow Cursor Toggle Switch -->
+      <button class="pill-chip" id="btnFollowCursor" title="開啟游標動態跟隨：滑鼠移動即時滑動簾幕 (C)">
+        <span class="chip-icon">⚡</span>
+        <span class="chip-text">游標跟隨</span>
+      </button>
+
+      <!-- Thumbnails Drawer Trigger -->
+      <button class="pill-chip" id="btnToggleThumbs" title="展開頁面縮圖 (T)">
+        <span class="chip-icon">📑</span>
+        <span class="chip-text">縮圖</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Bottom Thumbnails Drawer -->
+  <section class="thumbs-drawer" id="thumbsDrawer">
+    <div class="thumbs-header">
+      <span class="thumbs-title">頁面縮圖瀏覽 (1–63 頁)</span>
+      <button id="btnCloseThumbs" class="btn-close-thumbs" title="收合縮圖">✕</button>
+    </div>
+    <div class="thumbs-track" id="thumbsTrack">
+      <!-- 63 thumbnails generated dynamically -->
+    </div>
+  </section>
+
+  <!-- Keyboard Shortcuts & Help Modal -->
+  <div class="modal-backdrop" id="helpModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>快捷鍵與操作指南</h3>
+        <button id="btnCloseModal" class="btn-close">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="shortcut-list">
+          <div class="shortcut-item">
+            <kbd>Space</kbd> 或 <kbd>T</kbd>
+            <span>在中文與英文之間快速切換（單頁模式）</span>
+          </div>
+          <div class="shortcut-item">
+            <kbd>←</kbd> / <kbd>→</kbd>
+            <span>切換前一頁 / 下一頁</span>
+          </div>
+          <div class="shortcut-item">
+            <kbd>S</kbd>
+            <span>切換為「浮動游標分屏對照」模式</span>
+          </div>
+          <div class="shortcut-item">
+            <kbd>C</kbd>
+            <span>開啟 / 關閉「滑鼠游標自動跟隨對照」</span>
+          </div>
+          <div class="shortcut-item">
+            <kbd>F</kbd>
+            <span>切換全螢幕檢視</span>
+          </div>
+          <div class="shortcut-item">
+            <kbd>Home</kbd> / <kbd>End</kbd>
+            <span>跳轉至封面 (P.1) / 版權頁 (P.63)</span>
+          </div>
+          <div class="shortcut-item">
+            <kbd>拖曳中間線</kbd>
+            <span>水平滑動中英對照簾幕，即時比對版面與譯文</span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <p class="modal-note">桃園市立美術館 2025 年報 · 數位雙語對照成果呈獻</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="viewer.js"></script>
+</body>
+</html>
