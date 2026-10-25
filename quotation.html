@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>請款單 Invoice No. 376 | 六十度有限公司 - 桃園市立美術館年報專案</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-page: #0f1117;
+      --paper-bg: #ffffff;
+      --text-main: #18191c;
+      --text-secondary: #4b5262;
+      --text-muted: #737c90;
+      --border-color: #000000;
+      --border-subtle: #e2e5eb;
+      --accent-red: #d93829;
+      --accent-gold: #e5a93b;
+      --ctbc-green: #007f5f;
+      --esun-green: #00997b;
+      --kevin-orange: #f28500;
+      --shadow-sheet: 0 16px 40px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.08);
+      --radius-sm: 4px;
+      --radius-md: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      font-family: "Inter", "Noto Sans TC", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 16px 48px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Top Utility Bar (Screen only) */
+    .top-actions {
+      width: 100%;
+      max-width: 860px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .top-actions-left, .top-actions-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      background: rgba(255, 255, 255, 0.08);
+      color: #e6e8ec;
+      backdrop-filter: blur(8px);
+    }
+
+    .btn-action:hover {
+      background: rgba(255, 255, 255, 0.16);
+      color: #ffffff;
+      transform: translateY(-1px);
+    }
+
+    .btn-action.btn-primary {
+      background: var(--accent-red);
+      color: #ffffff;
+      border-color: var(--accent-red);
+    }
+
+    .btn-action.btn-primary:hover {
+      background: #c52d1f;
+      border-color: #c52d1f;
+    }
+
+    .btn-action.btn-gold {
+      background: rgba(229, 169, 59, 0.2);
+      color: #ffd679;
+      border-color: rgba(229, 169, 59, 0.4);
+    }
+
+    .btn-action.btn-gold:hover {
+      background: var(--accent-gold);
+      color: #000;
+    }
+
+    /* Paper Container */
+    .invoice-sheet {
+      width: 100%;
+      max-width: 860px;
+      background: var(--paper-bg);
+      border-radius: 6px;
+      box-shadow: var(--shadow-sheet);
+      padding: 44px 48px;
+      position: relative;
+    }
+
+    /* Header Info */
+    .sheet-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 24px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #111;
+    }
+
+    .recipient-block {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .recipient-to {
+      font-size: 18px;
+      font-weight: 800;
+      color: #111;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .recipient-name {
+      color: #185abc;
+      font-weight: 700;
+      font-size: 19px;
+    }
+
+    .invoice-date {
+      font-size: 14.5px;
+      font-weight: 600;
+      color: #333;
+      font-family: "JetBrains Mono", monospace;
+    }
+
+    .invoice-number-block {
+      text-align: right;
+      display: flex;
+      align-items: baseline;
+      justify-content: flex-end;
+      gap: 12px;
+    }
+
+    .invoice-label {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--accent-red);
+      letter-spacing: -0.5px;
+    }
+
+    .invoice-no {
+      font-size: 32px;
+      font-weight: 900;
+      color: var(--accent-red);
+      font-family: "JetBrains Mono", monospace;
+      letter-spacing: -0.5px;
+    }
+
+    /* Main Grid Table */
+    .invoice-table-wrapper {
+      width: 100%;
+      overflow-x: auto;
+      margin-bottom: 28px;
+    }
+
+    .invoice-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      table-layout: fixed;
+    }
+
+    .invoice-table col.col-sn { width: 95px; }
+    .invoice-table col.col-title { width: auto; }
+    .invoice-table col.col-unit { width: 90px; }
+    .invoice-table col.col-qty { width: 100px; }
+    .invoice-table col.col-amount { width: 110px; }
+
+    .invoice-table th, .invoice-table td {
+      border: 1px solid #000;
+      padding: 7px 10px;
+      vertical-align: middle;
+    }
+
+    .invoice-table th {
+      background: #ffffff;
+      font-weight: 800;
+      color: #000;
+      text-align: center;
+      font-size: 14px;
+      letter-spacing: 0.2px;
+    }
+
+    .invoice-table th.th-title {
+      text-align: center;
+    }
+
+    .invoice-table td.td-sn {
+      font-family: "JetBrains Mono", monospace;
+      font-weight: 700;
+      font-size: 13.5px;
+      text-align: center;
+    }
+
+    .invoice-table td.td-title {
+      font-weight: 500;
+      color: #111;
+      text-align: left;
+      line-height: 1.45;
+    }
+
+    .invoice-table td.td-subitem {
+      padding-left: 22px;
+      color: #333;
+    }
+
+    .invoice-table td.td-unit,
+    .invoice-table td.td-qty,
+    .invoice-table td.td-amount {
+      text-align: right;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 13.5px;
+    }
+
+    .invoice-table td.td-qty {
+      font-weight: 600;
+    }
+
+    .invoice-table td.td-amount {
+      font-weight: 700;
+      color: #000;
+    }
+
+    /* Summary Totals */
+    .invoice-table tr.row-empty td {
+      border: 1px solid #000;
+      height: 22px;
+    }
+
+    .invoice-table tr.row-summary td {
+      font-weight: 700;
+    }
+
+    .invoice-table tr.row-summary td.td-label {
+      font-weight: 700;
+      color: #000;
+    }
+
+    .invoice-table tr.row-total td {
+      font-size: 16px;
+      font-weight: 800;
+    }
+
+    .invoice-table tr.row-total td.td-total-amount {
+      font-size: 18px;
+      font-weight: 900;
+      color: #000;
+    }
+
+    /* Payment & Contact Section */
+    .payment-section {
+      margin-top: 10px;
+    }
+
+    .payment-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: #000;
+      margin-bottom: 12px;
+    }
+
+    .payment-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    /* Bank Accounts */
+    .bank-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .bank-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 6px 0;
+    }
+
+    .bank-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px 10px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      color: #fff;
+      min-width: 68px;
+    }
+
+    .badge-ctbc {
+      background-color: var(--ctbc-green);
+    }
+
+    .badge-esun {
+      background-color: var(--esun-green);
+    }
+
+    .bank-account-num {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 15px;
+      font-weight: 700;
+      color: #000;
+      letter-spacing: 0.5px;
+    }
+
+    .btn-copy-account {
+      background: none;
+      border: 1px solid #ccc;
+      border-radius: var(--radius-sm);
+      padding: 2px 7px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      color: #444;
+      transition: all 0.15s;
+    }
+
+    .btn-copy-account:hover {
+      background: #f0f0f0;
+      border-color: #888;
+      color: #000;
+    }
+
+    /* Contact Details */
+    .contact-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 14px;
+    }
+
+    .contact-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .contact-label {
+      color: #555;
+      font-weight: 600;
+      font-size: 13.5px;
+      min-width: 120px;
+    }
+
+    .contact-value {
+      font-family: "JetBrains Mono", monospace;
+      font-weight: 700;
+      color: #000;
+      font-size: 14px;
+      text-align: right;
+    }
+
+    .contact-value a {
+      color: #185abc;
+      text-decoration: none;
+    }
+
+    .contact-value a:hover {
+      text-decoration: underline;
+    }
+
+    /* Signature Block */
+    .signature-row {
+      margin-top: 18px;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+    }
+
+    .signature-name {
+      font-size: 28px;
+      font-weight: 900;
+      color: var(--kevin-orange);
+      letter-spacing: -0.5px;
+      font-family: "Inter", sans-serif;
+    }
+
+    /* Footer Note */
+    .sheet-footer-note {
+      margin-top: 28px;
+      padding-top: 12px;
+      border-top: 1px dashed #d0d4dc;
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .sheet-footer-note a {
+      color: #185abc;
+      text-decoration: none;
+    }
+
+    .sheet-footer-note a:hover {
+      text-decoration: underline;
+    }
+
+    /* Toast Notification */
+    .toast-msg {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(30px);
+      background: rgba(18, 19, 24, 0.95);
+      border: 1px solid rgba(229, 169, 59, 0.6);
+      color: #ffffff;
+      padding: 10px 20px;
+      border-radius: 30px;
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 999;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .toast-msg.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* Print Styles */
+    @media print {
+      @page {
+        size: A4 portrait;
+        margin: 12mm 14mm;
+      }
+
+      body {
+        background: #ffffff !important;
+        padding: 0 !important;
+        color: #000000 !important;
+      }
+
+      .top-actions, .btn-copy-account, .toast-msg, .sheet-footer-note {
+        display: none !important;
+      }
+
+      .invoice-sheet {
+        box-shadow: none !important;
+        padding: 0 !important;
+        max-width: 100% !important;
+        border-radius: 0 !important;
+      }
+
+      .bank-badge {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      .invoice-label, .invoice-no {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      .signature-name {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+    }
+
+    /* Responsive Mobile Styles */
+    @media (max-width: 768px) {
+      .invoice-sheet {
+        padding: 24px 18px;
+      }
+
+      .sheet-header {
+        flex-direction: column;
+        gap: 14px;
+      }
+
+      .invoice-number-block {
+        justify-content: flex-start;
+      }
+
+      .payment-grid {
+        grid-template-columns: 1fr;
+        gap: 18px;
+      }
+
+      .contact-row {
+        justify-content: space-between;
+      }
+
+      .invoice-table col.col-sn { width: 75px; }
+      .invoice-table col.col-unit { width: 70px; }
+      .invoice-table col.col-qty { width: 80px; }
+      .invoice-table col.col-amount { width: 85px; }
+      .invoice-table { font-size: 12.5px; }
+      .invoice-table td.td-sn,
+      .invoice-table td.td-unit,
+      .invoice-table td.td-qty,
+      .invoice-table td.td-amount { font-size: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Utilities Bar -->
+  <aside class="top-actions">
+    <div class="top-actions-left">
+      <a href="/2025/" class="btn-action">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        返回 2025 年報網頁
+      </a>
+      <a href="https://docs.google.com/spreadsheets/d/1zz-hz2Ow2sRzkohYE0RKd2f8liu4B9ajY5R7YrhOZS8/edit?usp=sharing" target="_blank" rel="noopener noreferrer" class="btn-action">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+        開啟 Google 試算表
+      </a>
+    </div>
+    <div class="top-actions-right">
+      <button class="btn-action btn-gold" id="btnCopyBankAll">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+        複製匯款資訊
+      </button>
+      <button class="btn-action btn-primary" onclick="window.print()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        列印 / 另存 PDF
+      </button>
+    </div>
+  </aside>
+
+  <!-- Printable Invoice Paper Sheet -->
+  <main class="invoice-sheet" id="invoiceSheet">
+    <!-- Header -->
+    <header class="sheet-header">
+      <div class="recipient-block">
+        <div class="recipient-to">
+          <span>To</span>
+          <span class="recipient-name">六十度有限公司</span>
+        </div>
+        <div class="invoice-date">25/10/2026</div>
+      </div>
+      <div class="invoice-number-block">
+        <span class="invoice-label">Invoice No.</span>
+        <span class="invoice-no">376</span>
+      </div>
+    </header>
+
+    <!-- Detailed Invoice Items Table -->
+    <div class="invoice-table-wrapper">
+      <table class="invoice-table">
+        <colgroup>
+          <col class="col-sn">
+          <col class="col-title">
+          <col class="col-unit">
+          <col class="col-qty">
+          <col class="col-amount">
+        </colgroup>
+        <thead>
+          <tr>
+            <th>SN.</th>
+            <th class="th-title">Title</th>
+            <th>單價</th>
+            <th>數量</th>
+            <th>TWD</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="td-sn">4891-1</td>
+            <td class="td-title">桃園美術館 2022年報（2023年案）資料主稿</td>
+            <td class="td-unit">0.974</td>
+            <td class="td-qty">33,733</td>
+            <td class="td-amount">32,856</td>
+          </tr>
+          <tr>
+            <td class="td-sn">4891-2</td>
+            <td class="td-title td-subitem">└ 館長序文（去重淨值）</td>
+            <td class="td-unit">0.974</td>
+            <td class="td-qty">1,817</td>
+            <td class="td-amount">1,770</td>
+          </tr>
+          <tr>
+            <td class="td-sn">4891-3</td>
+            <td class="td-title td-subitem">└ 二校補文字（去重淨值）</td>
+            <td class="td-unit">0.974</td>
+            <td class="td-qty">3,537</td>
+            <td class="td-amount">3,445</td>
+          </tr>
+          <tr>
+            <td class="td-sn">4891-4</td>
+            <td class="td-title td-subitem">└ 二校補圖檔（去重淨值）</td>
+            <td class="td-unit">0.974</td>
+            <td class="td-qty">177</td>
+            <td class="td-amount">172</td>
+          </tr>
+          <tr>
+            <td class="td-sn">4892</td>
+            <td class="td-title">桃園美術館 2023年報（2024年案）翻譯與審稿</td>
+            <td class="td-unit">0.974</td>
+            <td class="td-qty">23,323</td>
+            <td class="td-amount">22,717</td>
+          </tr>
+          <tr>
+            <td class="td-sn">4892-1</td>
+            <td class="td-title td-subitem">└ 校稿新增零星圖說（補譯）</td>
+            <td class="td-unit">0.974</td>
+            <td class="td-qty">150</td>
+            <td class="td-amount">146</td>
+          </tr>
+          <tr>
+            <td class="td-sn">4892-2</td>
+            <td class="td-title td-subitem">└ 桃源國際獎座談全文（聽打與翻譯）</td>
+            <td class="td-unit">0.974</td>
+            <td class="td-qty">14,120</td>
+            <td class="td-amount">13,753</td>
+          </tr>
+          <tr>
+            <td class="td-sn">4893</td>
+            <td class="td-title">桃園美術館 2024年報（2025年案）翻譯與審稿</td>
+            <td class="td-unit">0.974</td>
+            <td class="td-qty">21,894</td>
+            <td class="td-amount">21,325</td>
+          </tr>
+          <!-- Empty separator row -->
+          <tr class="row-empty">
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+          </tr>
+          <!-- Subtotal -->
+          <tr class="row-summary">
+            <td style="border-right: none;"></td>
+            <td class="td-label" style="border-left: none;">Subtotal</td>
+            <td></td>
+            <td></td>
+            <td class="td-amount">96,184</td>
+          </tr>
+          <!-- Tax 5% -->
+          <tr class="row-summary">
+            <td style="border-right: none;"></td>
+            <td class="td-label" style="border-left: none;">tax</td>
+            <td class="td-unit">5%</td>
+            <td></td>
+            <td class="td-amount">4,809</td>
+          </tr>
+          <!-- Total Due -->
+          <tr class="row-summary row-total">
+            <td colspan="4" style="text-align: right; padding-right: 16px; font-weight: 800; letter-spacing: 0.3px;">Total Due</td>
+            <td class="td-amount td-total-amount">100,993</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Payment & Contact Information -->
+    <section class="payment-section">
+      <h3 class="payment-title">Payment Method:</h3>
+      
+      <div class="payment-grid">
+        <!-- Bank Accounts (Left Column) -->
+        <div class="bank-list">
+          <div class="bank-card">
+            <span class="bank-badge badge-ctbc">CTBC</span>
+            <span class="bank-account-num">(822) 543540114573</span>
+            <button class="btn-copy-account" data-copy="822543540114573" data-label="中國信託帳號">複製</button>
+          </div>
+          <div class="bank-card">
+            <span class="bank-badge badge-esun">E.SUN</span>
+            <span class="bank-account-num">(808) 0532979216388</span>
+            <button class="btn-copy-account" data-copy="8080532979216388" data-label="玉山銀行帳號">複製</button>
+          </div>
+        </div>
+
+        <!-- Contact Info (Right Column) -->
+        <div class="contact-list">
+          <div class="contact-row">
+            <span class="contact-label">E-Mail</span>
+            <span class="contact-value"><a href="mailto:k@kuo.ooo">k@kuo.ooo</a></span>
+          </div>
+          <div class="contact-row">
+            <span class="contact-label">WeChat</span>
+            <span class="contact-value">18551650826</span>
+          </div>
+          <div class="contact-row">
+            <span class="contact-label">Telegram &amp; LINE</span>
+            <span class="contact-value">kekukeku</span>
+          </div>
+          <div class="contact-row">
+            <span class="contact-label">TEL &amp; WhatsApp</span>
+            <span class="contact-value"><a href="tel:+886953690826">+886953690826</a></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Signature -->
+      <div class="signature-row">
+        <div class="signature-name">Kevin Kuo</div>
+      </div>
+    </section>
+
+    <!-- Footer metadata -->
+    <footer class="sheet-footer-note">
+      <div>專案：桃園市立美術館年報翻譯與審稿 | 承攬人：Kevin Kuo</div>
+      <div>原始試算表：<a href="https://docs.google.com/spreadsheets/d/1zz-hz2Ow2sRzkohYE0RKd2f8liu4B9ajY5R7YrhOZS8/edit?usp=sharing" target="_blank" rel="noopener noreferrer">Google Sheets 檢視</a></div>
+    </footer>
+  </main>
+
+  <!-- Toast Notification -->
+  <div class="toast-msg" id="toast">✅ 已複製到剪貼簿</div>
+
+  <script>
+    // Copy buttons
+    const toast = document.getElementById('toast');
+    let toastTimer = null;
+
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2500);
+    }
+
+    function copyToClipboard(text, successMsg) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => {
+          showToast(successMsg);
+        }).catch(() => {
+          fallbackCopy(text, successMsg);
+        });
+      } else {
+        fallbackCopy(text, successMsg);
+      }
+    }
+
+    function fallbackCopy(text, successMsg) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      try {
+        document.execCommand('copy');
+        showToast(successMsg);
+      } catch (_) {
+        showToast('❌ 複製失敗');
+      }
+      document.body.removeChild(ta);
+    }
+
+    // Individual bank copy buttons
+    document.querySelectorAll('.btn-copy-account').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const val = btn.dataset.copy;
+        const label = btn.dataset.label || '帳號';
+        copyToClipboard(val, `✅ 已複製 ${label}：${val}`);
+      });
+    });
+
+    // Copy all bank info button
+    const btnCopyBankAll = document.getElementById('btnCopyBankAll');
+    if (btnCopyBankAll) {
+      btnCopyBankAll.addEventListener('click', () => {
+        const text = `【六十度有限公司 請款單 No. 376 付款資訊】\n總計應付：TWD 100,993\n\n1. 中國信託商業銀行 (822)\n帳號：543540114573\n\n2. 玉山商業銀行 (808)\n帳號：0532979216388\n\n聯絡人：Kevin Kuo\nE-mail: k@kuo.ooo\nTEL: +886953690826`;
+        copyToClipboard(text, '✅ 已複製完整匯款與聯絡資訊！');
+      });
+    }
+  </script>
+</body>
+</html>
