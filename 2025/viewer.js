@@ -259,11 +259,19 @@
     if (pct > 100) pct = 100;
     splitPct = pct;
 
-    splitContainer.style.setProperty('--split-pct', `${splitPct.toFixed(2)}%`);
-    curtainLine.style.left = `${splitPct.toFixed(2)}%`;
+    const pctStr = `${splitPct.toFixed(2)}%`;
+    splitContainer.style.setProperty('--split-pct', pctStr);
+    curtainLine.style.left = pctStr;
 
-    // Update clip-path on English overlay (both image and text layer)
-    layerEn.style.clipPath = `polygon(${splitPct.toFixed(2)}% 0, 100% 0, 100% 100%, ${splitPct.toFixed(2)}% 100%)`;
+    // Symmetrical clip-path: Chinese on left, English on right
+    layerZh.style.clipPath = `polygon(0 0, ${pctStr} 0, ${pctStr} 100%, 0 100%)`;
+    layerEn.style.clipPath = `polygon(${pctStr} 0, 100% 0, 100% 100%, ${pctStr} 100%)`;
+
+    // Ensure both layers are visible and active in split mode
+    layerZh.style.display = 'block';
+    layerZh.style.opacity = '1';
+    layerEn.style.display = 'block';
+    layerEn.style.opacity = '1';
 
     // Update pill indicator
     if (splitPct <= 5) {
@@ -319,20 +327,27 @@
 
     if (currentMode === 'split') {
       curtainLine.style.display = 'block';
+      layerZh.style.display = 'block';
+      layerZh.style.opacity = '1';
+      layerEn.style.display = 'block';
       layerEn.style.opacity = '1';
       setSplitPercentage(splitPct);
       mouseFollower.classList.remove('visible');
     } else if (currentMode === 'toggle') {
       curtainLine.style.display = 'none';
       if (activeLang === 'en') {
-        layerEn.style.clipPath = 'polygon(0 0, 100% 0, 100% 100%, 0 100%)';
+        layerZh.style.display = 'none';
+        layerEn.style.display = 'block';
+        layerEn.style.clipPath = 'none';
         layerEn.style.opacity = '1';
         pillEn.classList.add('active');
         pillZh.classList.remove('active');
         pillSplitToggle.classList.remove('active');
       } else {
-        layerEn.style.clipPath = 'polygon(100% 0, 100% 0, 100% 100%, 100% 100%)';
-        layerEn.style.opacity = '0';
+        layerEn.style.display = 'none';
+        layerZh.style.display = 'block';
+        layerZh.style.clipPath = 'none';
+        layerZh.style.opacity = '1';
         pillZh.classList.add('active');
         pillEn.classList.remove('active');
         pillSplitToggle.classList.remove('active');

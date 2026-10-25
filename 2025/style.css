@@ -378,16 +378,28 @@ html, body {
   left: 0;
   width: 100%;
   height: 100%;
+  isolation: isolate; /* ponytail: strict stacking context isolation prevents text layer escape */
 }
 
 .layer img {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   object-fit: contain;
   display: block;
+  z-index: 1;
 }
 
-/* Top layer is English, clipped by split position */
+/* Chinese layer (left side in split mode) */
+.layer-zh {
+  z-index: 1;
+  clip-path: polygon(0 0, var(--split-pct, 50%) 0, var(--split-pct, 50%) 100%, 0 100%);
+  transition: opacity 0.25s ease;
+}
+
+/* English layer (right side in split mode) */
 .layer-en {
   z-index: 2;
   clip-path: polygon(var(--split-pct, 50%) 0, 100% 0, 100% 100%, var(--split-pct, 50%) 100%);
@@ -935,7 +947,7 @@ kbd {
   width: 100%;
   height: 100%;
   pointer-events: none;
-  z-index: 4;
+  z-index: 2; /* Sits above img (z-index: 1) inside its own isolated layer */
   overflow: hidden;
   user-select: text;
   -webkit-user-select: text;
