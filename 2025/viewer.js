@@ -46,7 +46,6 @@
   const imgSideEn = document.getElementById('imgSideEn');
   const pageStage = document.getElementById('pageStage');
   const viewerMain = document.getElementById('viewerMain');
-  const mouseFollower = document.getElementById('mouseFollower');
 
   // Nav & Header Elements
   const pageInput = document.getElementById('pageInput');
@@ -221,29 +220,12 @@
   // Transparent In-Place Text Selection Layer
   // ----------------------------------------------------
   function renderTextLayers() {
-    if (!pagesData || !pagesData[currentPage]) {
-      [textLayerZh, textLayerEn, textLayerSideZh, textLayerSideEn].forEach(el => {
-        if (el) el.innerHTML = '';
-      });
-      return;
-    }
-
-    const pData = pagesData[currentPage];
-
-    // English Text Lines
-    const htmlEn = (pData.lines_en || []).map(l => {
-      return `<span class="text-line" style="left:${l.l}%;top:${l.top}%;width:${l.w}%;height:${l.h}%;font-size:calc(var(--stage-scale, 1) * ${l.s * 5.95}px);">${escapeHtml(l.t)}</span>`;
-    }).join('');
-
-    // Chinese Text Lines
-    const htmlZh = (pData.lines_zh || []).map(l => {
-      return `<span class="text-line" style="left:${l.l}%;top:${l.top}%;width:${l.w}%;height:${l.h}%;font-size:calc(var(--stage-scale, 1) * ${l.s * 5.95}px);">${escapeHtml(l.t)}</span>`;
-    }).join('');
-
-    if (textLayerEn) textLayerEn.innerHTML = htmlEn;
-    if (textLayerZh) textLayerZh.innerHTML = htmlZh;
-    if (textLayerSideEn) textLayerSideEn.innerHTML = htmlEn;
-    if (textLayerSideZh) textLayerSideZh.innerHTML = htmlZh;
+    // ponytail: YAGNI - 徹底關閉圖片透明文字疊層，避免字體錯位鬼影重疊
+    // 由右側「純文字抽屜」與「一鍵複製英文」完美承接紙本書文字排版需求
+    [textLayerZh, textLayerEn, textLayerSideZh, textLayerSideEn].forEach(el => {
+      if (el) el.innerHTML = '';
+    });
+    return;
   }
 
   function escapeHtml(str) {
@@ -317,7 +299,6 @@
     if (currentMode === 'side') {
       splitContainer.style.display = 'none';
       sideContainer.style.display = 'flex';
-      mouseFollower.classList.remove('visible');
       return;
     }
 
@@ -332,7 +313,6 @@
       layerEn.style.display = 'block';
       layerEn.style.opacity = '1';
       setSplitPercentage(splitPct);
-      mouseFollower.classList.remove('visible');
     } else if (currentMode === 'toggle') {
       curtainLine.style.display = 'none';
       if (activeLang === 'en') {
@@ -609,39 +589,14 @@
       e.preventDefault();
     });
 
-    let clickPointerDown = null;
-    splitContainer.addEventListener('pointerdown', (e) => {
-      clickPointerDown = { x: e.clientX, y: e.clientY, time: Date.now() };
-    });
-
     window.addEventListener('pointermove', (e) => {
       if (isDragging) {
         handlePointerMoveOnCurtain(e.clientX);
       } else if (followCursor && currentMode === 'split') {
-        // If user is holding mouse button down (dragging to select text), do NOT move curtain!
-        if (e.buttons > 0) return;
         const rect = splitContainer.getBoundingClientRect();
         if (e.clientX >= rect.left && e.clientX <= rect.right &&
             e.clientY >= rect.top && e.clientY <= rect.bottom) {
           handlePointerMoveOnCurtain(e.clientX);
-        }
-      }
-
-      // Mouse follower badge in toggle mode (hide if text is selected)
-      if (currentMode === 'toggle') {
-        const selection = window.getSelection();
-        if (selection && selection.toString().trim().length > 0) {
-          mouseFollower.classList.remove('visible');
-          return;
-        }
-        const rect = splitContainer.getBoundingClientRect();
-        if (e.clientX >= rect.left && e.clientX <= rect.right &&
-            e.clientY >= rect.top && e.clientY <= rect.bottom) {
-          mouseFollower.style.left = `${e.clientX}px`;
-          mouseFollower.style.top = `${e.clientY}px`;
-          mouseFollower.classList.add('visible');
-        } else {
-          mouseFollower.classList.remove('visible');
         }
       }
     });
@@ -651,35 +606,6 @@
         isDragging = false;
         curtainHandle.classList.remove('dragging');
         try { curtainHandle.releasePointerCapture(e.pointerId); } catch (_) {}
-      }
-    });
-
-    // In toggle mode, strict guard against text selection triggering language switch
-    splitContainer.addEventListener('click', (e) => {
-      // 1. If clicked inside text layer or text line, never toggle
-      if (e.target.closest('.text-layer') || e.target.closest('.text-line')) {
-        return;
-      }
-
-      // 2. If there is currently selected / highlighted text, never toggle
-      const selection = window.getSelection();
-      if (selection && selection.toString().trim().length > 0) {
-        return;
-      }
-
-      // 3. If pointer moved or was held down (selection/drag gesture), never toggle
-      if (clickPointerDown) {
-        const dist = Math.hypot(e.clientX - clickPointerDown.x, e.clientY - clickPointerDown.y);
-        const elapsed = Date.now() - clickPointerDown.time;
-        clickPointerDown = null;
-        if (dist > 6 || elapsed > 350) {
-          return;
-        }
-      }
-
-      // 4. Only genuine, clean clicks on the empty background in toggle mode
-      if (currentMode === 'toggle') {
-        toggleLanguage();
       }
     });
 

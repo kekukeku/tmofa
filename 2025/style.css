@@ -523,27 +523,9 @@ html, body {
   display: block;
 }
 
-/* Mouse Follower Tooltip Badge */
+/* Mouse Follower Tooltip Badge (Removed) */
 .mouse-follower {
-  position: fixed;
-  pointer-events: none;
-  background: rgba(18, 19, 24, 0.88);
-  border: 1px solid var(--border-active);
-  backdrop-filter: blur(12px);
-  color: #fff;
-  font-size: 10.5px;
-  font-weight: 600;
-  padding: 4px 9px;
-  border-radius: var(--radius-full);
-  z-index: 90;
-  transform: translate(14px, 14px);
-  opacity: 0;
-  transition: opacity 0.2s;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
-}
-
-.mouse-follower.visible {
-  opacity: 1;
+  display: none !important;
 }
 
 /* ================= Floating Bottom Pill Bar ================= */
@@ -940,17 +922,9 @@ kbd {
 
 
 /* ================= Text Selection Layer ================= */
+/* ponytail: YAGNI - 徹底關閉圖片上方的透明文字層，禁止在圖片上浮出任何鬼影字體 */
 .text-layer {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 2; /* Sits above img (z-index: 1) inside its own isolated layer */
-  overflow: hidden;
-  user-select: text;
-  -webkit-user-select: text;
+  display: none !important;
 }
 
 .text-line {
